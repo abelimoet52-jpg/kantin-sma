@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kantin SMAN 1 Sidayu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- QR Code Generator & Scanner Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#4F46E5',
+                            lightBlue: '#E0E7FF',
+                            sky: '#0EA5E9',
+                            pink: '#EC4899',
+                            lightPink: '#FCE7F3',
+                            dark: '#1E293B',
+                            light: '#F8FAFC'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #EFF6FF 0%, #FDF2F8 100%);
+            min-height: 100vh;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-brand-pink selection:text-white">
+
+    <div id="app" class="max-w-md md:max-w-4xl mx-auto min-h-screen flex flex-col bg-white shadow-2xl relative overflow-hidden">
+        
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-brand-sky via-brand-blue to-brand-pink text-white p-4 sticky top-0 z-30 shadow-md">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl border border-white/30">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight tracking-wide">KANTIN SMAN 1 SIDAYU</h1>
+                        <p class="text-xs text-white/80 font-light" id="roleSubtitle">Mode Pembeli (Pemesanan)</p>
+                    </div>
+                </div>
+                
+                <button onclick="toggleRoleModal()" class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition border border-white/40 active:scale-95">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                    <span id="roleBtnText">Ke Penjual</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 p-4 pb-24 overflow-y-auto hide-scrollbar">
+
+            <!-- MODE PEMBELI -->
+            <div id="buyerSection" class="space-y-6">
+                <div class="bg-gradient-to-r from-brand-lightBlue to-brand-lightPink p-4 rounded-2xl border border-blue-100 flex items-center justify-between shadow-sm">
+                    <div>
+                        <h2 class="font-semibold text-brand-dark text-base">Lapar Pas Istirahat? 🥪</h2>
+                        <p class="text-xs text-slate-600">Pilih jajan favoritmu dan scan di kasir tanpa ribet!</p>
+                    </div>
+                    <div class="text-3xl text-brand-pink">
+                        <i class="fa-solid fa-burger"></i>
+                    </div>
+                </div>
+
+                <!-- Kategori -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+                    <button onclick="filterCategory('all')" class="cat-btn active px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition bg-brand-blue text-white shadow-sm" data-cat="all">Semua</button>
+                    <button onclick="filterCategory('Makanan')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="Makanan">🍜 Makanan</button>
+                    <button onclick="filterCategory('Minuman')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="Minuman">🥤 Minuman</button>
+                    <button onclick="filterCategory('Cemilan')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="Cemilan">🍿 Cemilan</button>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-slate-700 text-sm mb-3">Daftar Jajanan Tersedia</h3>
+                    <div id="buyerMenuList" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+                </div>
+            </div>
+
+            <!-- MODE PENJUAL -->
+            <div id="sellerSection" class="space-y-6 hidden">
+                <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-amber-900 text-sm">Mode Kelola Penjual</h2>
+                            <p class="text-xs text-amber-700">Scan QR Pesanan & Kelola Menu</p>
+                        </div>
+                    </div>
+                    <button onclick="logoutSeller()" class="text-xs text-rose-600 font-semibold underline">Keluar Mode</button>
+                </div>
+
+                <!-- Tab Penjual -->
+                <div class="flex border-b border-slate-200">
+                    <button onclick="switchSellerTab('orders')" id="tabBtnOrders" class="flex-1 py-2.5 text-xs font-bold border-b-2 border-brand-pink text-brand-pink">
+                        <i class="fa-solid fa-receipt mr-1"></i> Pesanan Masuk 
+                        <span id="orderCountBadge" class="ml-1 px-1.5 py-0.5 text-[10px] bg-rose-500 text-white rounded-full font-bold">0</span>
+                    </button>
+                    <button onclick="switchSellerTab('scan')" id="tabBtnScan" class="flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400">
+                        <i class="fa-solid fa-qrcode mr-1"></i> Scan QR
+                    </button>
+                    <button onclick="switchSellerTab('menu')" id="tabBtnMenu" class="flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400">
+                        <i class="fa-solid fa-boxes-stacked mr-1"></i> Kelola Jajanan
+                    </button>
+                </div>
+
+                <!-- TAB 1: Pesanan -->
+                <div id="sellerOrdersTab" class="space-y-3">
+                    <div id="sellerOrderList" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB 2: Scan -->
+                <div id="sellerScanTab" class="space-y-4 hidden">
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl text-center space-y-3">
+                        <h3 class="font-bold text-sm text-brand-lightPink flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-camera"></i> Pemindai QR Pesanan Pembeli
+                        </h3>
+                        <p class="text-xs text-slate-300">Arahkan kamera ke QR Code di layar HP pembeli untuk verifikasi.</p>
+                        <div id="qr-reader" class="w-full bg-slate-800 rounded-2xl overflow-hidden border border-slate-700"></div>
+                        <button onclick="startQrScanner()" class="bg-brand-pink hover:bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                            <i class="fa-solid fa-power-off mr-1"></i> Aktifkan Kamera Scanner
+                        </button>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">Atau Masukkan Kode Antrean Manual</h4>
+                        <div class="flex gap-2">
+                            <input type="text" id="manualScanInput" placeholder="Contoh: #001" class="flex-1 text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue uppercase">
+                            <button onclick="handleManualScan()" class="bg-brand-blue hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold">Proses Scan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Kelola Menu -->
+                <div id="sellerMenuTab" class="space-y-4 hidden">
+                    <form id="menuForm" onsubmit="handleSaveMenu(event)" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">Tambah / Edit Jajanan</h4>
+                        <input type="hidden" id="menuId">
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama Jajanan</label>
+                                <input type="text" id="menuName" required placeholder="Nasi Uduk" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Harga (Rp)</label>
+                                <input type="number" id="menuPrice" required placeholder="5000" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Kategori</label>
+                                <select id="menuCategory" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                                    <option value="Makanan">Makanan</option>
+                                    <option value="Minuman">Minuman</option>
+                                    <option value="Cemilan">Cemilan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Emoji Icon</label>
+                                <input type="text" id="menuIcon" placeholder="🍱" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-1">
+                            <button type="submit" class="flex-1 bg-brand-blue hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition">Simpan Menu</button>
+                            <button type="button" onclick="resetMenuForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2.5 rounded-xl text-xs font-semibold">Batal</button>
+                        </div>
+                    </form>
+
+                    <div>
+                        <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider mb-2">Daftar Jajanan Aktif</h4>
+                        <div id="sellerMenuList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- FLOATING CART -->
+        <div id="floatingCart" class="fixed bottom-0 left-0 right-0 max-w-md md:max-w-4xl mx-auto p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-xl transition-transform transform translate-y-full z-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-brand-pink text-white flex items-center justify-center font-bold text-sm shadow-md">
+                    <span id="cartCount">0</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase block">Total Keranjang</span>
+                    <span id="cartTotal" class="font-extrabold text-brand-blue text-base">Rp 0</span>
+                </div>
+            </div>
+            <button onclick="openCheckoutModal()" class="bg-gradient-to-r from-brand-blue to-brand-pink hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg transition">
+                Lanjut ke Pembayaran <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- MODAL AUTH PENJUAL -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">Akses Khusus Penjual</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan Kode Keamanan untuk mengelola kantin.</p>
+            
+            <form onsubmit="verifySellerCode(event)" class="space-y-3">
+                <input type="password" id="sellerCodeInput" placeholder="Kode Keamanan" required class="w-full text-center text-sm tracking-widest p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-pink font-mono uppercase">
+                <p id="authError" class="text-[11px] text-rose-500 font-semibold hidden">Kode salah! Petunjuk: SMAKANTIN1</p>
+                <button type="submit" class="w-full bg-brand-pink hover:bg-pink-600 text-white py-3 rounded-xl font-bold text-xs transition shadow-md">
+                    Masuk Mode Penjual
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CHECKOUT -->
+    <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800 text-sm">Detail Pesanan & Pembayaran</h3>
+                <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="checkoutItems" class="max-h-36 overflow-y-auto divide-y divide-slate-100 mb-3 pr-1"></div>
+
+            <div class="bg-slate-50 p-3 rounded-xl mb-4 space-y-1">
+                <div class="flex justify-between text-xs text-slate-800 font-bold">
+                    <span>Total Bayar</span>
+                    <span id="checkoutTotal" class="text-brand-pink font-extrabold text-sm">Rp 0</span>
+                </div>
+            </div>
+
+            <form onsubmit="processOrder(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pemesan / Kelas</label>
+                    <input type="text" id="buyerName" required placeholder="Contoh: Budi (XII IPA 1)" class="w-full text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Metode Pembayaran</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="border rounded-xl p-2.5 text-center cursor-pointer transition has-[:checked]:border-brand-pink has-[:checked]:bg-brand-lightPink">
+                            <input type="radio" name="payMethod" value="Tunai" checked class="hidden">
+                            <i class="fa-solid fa-money-bill-wave text-emerald-500 text-lg block mb-1"></i>
+                            <span class="text-[10px] font-bold block text-slate-700">Tunai</span>
+                        </label>
+                        <label class="border rounded-xl p-2.5 text-center cursor-pointer transition has-[:checked]:border-brand-pink has-[:checked]:bg-brand-lightPink">
+                            <input type="radio" name="payMethod" value="QRIS" class="hidden">
+                            <i class="fa-solid fa-qrcode text-brand-blue text-lg block mb-1"></i>
+                            <span class="text-[10px] font-bold block text-slate-700">QRIS</span>
+                        </label>
+                        <label class="border rounded-xl p-2.5 text-center cursor-pointer transition has-[:checked]:border-brand-pink has-[:checked]:bg-brand-lightPink">
+                            <input type="radio" name="payMethod" value="E-Wallet" class="hidden">
+                            <i class="fa-solid fa-wallet text-amber-500 text-lg block mb-1"></i>
+                            <span class="text-[10px] font-bold block text-slate-700">E-Wallet</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-brand-blue to-brand-pink text-white py-3.5 rounded-xl font-bold text-xs shadow-lg hover:opacity-95 transition">
+                    Buat Kode QR Pembayaran
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL RECEIPT / QR TIKET -->
+    <div id="receiptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-brand-sky via-brand-blue to-brand-pink"></div>
+            
+            <div class="w-12 h-12 bg-brand-lightBlue text-brand-blue rounded-full flex items-center justify-center mx-auto my-2 text-xl">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            
+            <h3 class="font-bold text-slate-800 text-base">Tunjukkan QR ke Penjual</h3>
+            <p class="text-xs text-slate-500 mb-3">Scan QR di kasir untuk menyelesaikan pembayaran & mengambil pesanan</p>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 my-2 flex flex-col items-center justify-center">
+                <div id="qrcode" class="p-2 bg-white rounded-xl shadow-sm border mb-2"></div>
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Nomor Antrean</span>
+                <span class="text-2xl font-black text-brand-blue tracking-widest my-0.5 block" id="receiptQueue">#001</span>
+                <span class="text-xs font-semibold text-slate-600 block" id="receiptName">Nama Pemesan</span>
+            </div>
+
+            <div class="space-y-2 mt-3">
+                <button onclick="simulasiScanSelf()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-sm">
+                    ⚡ Simulasi Penjual Selesaikan
+                </button>
+                <button onclick="closeReceiptModal()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl font-semibold text-xs hover:bg-slate-300 transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SUKSES SCAN -->
+    <div id="successScanModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative overflow-hidden">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl shadow-inner">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            
+            <h3 class="font-black text-slate-800 text-lg">Pembelian Selesai!</h3>
+            <p class="text-xs text-slate-500 mb-4">Pesanan telah diverifikasi & pembayaran berhasil.</p>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 text-left space-y-1.5">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Antrean</span>
+                    <span class="text-base font-black text-brand-blue" id="scanModalQueue">#001</span>
+                </div>
+                <div class="flex justify-between text-xs pt-1">
+                    <span class="text-slate-500">Pemesan:</span>
+                    <span class="font-bold text-slate-800" id="scanModalBuyer">-</span>
+                </div>
+                <div class="flex justify-between text-xs pt-1 border-t border-slate-200">
+                    <span class="font-semibold text-slate-600">Total Lunas:</span>
+                    <span class="font-extrabold text-brand-pink" id="scanModalTotal">Rp 0</span>
+                </div>
+            </div>
+
+            <button onclick="closeSuccessScanModal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs shadow-md transition">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE & SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kantin-sman1-sidayu';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDummyKeyForLocalTestingMode-Sidayu",
+            authDomain: "kantin-sidayu.firebaseapp.com",
+            projectId: "kantin-sidayu"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.updateDoc = updateDoc;
+        window.doc = doc;
+        window.onSnapshot = onSnapshot;
+        window.appId = appId;
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.log("Auth fallback:", e);
+            }
+            if (typeof window.startRealtimeSync === 'function') {
+                window.startRealtimeSync();
+            }
+        }
+        initAuth();
+    </script>
+
+    <!-- MAIN APP LOGIC -->
+    <script>
+        const SECURITY_CODE = "SMAKANTIN1";
+        let isSellerAuthenticated = false;
+        let currentRole = 'buyer';
+        let html5QrCode = null;
+
+        let menuItems = [
+            { id: '1', name: 'Nasi Goreng Kantin', price: 10000, category: 'Makanan', icon: '🍛' },
+            { id: '2', name: 'Mie Ayam Spesial', price: 12000, category: 'Makanan', icon: '🍜' },
+            { id: '3', name: 'Es Teh Manis Jumbo', price: 3000, category: 'Minuman', icon: '🥤' },
+            { id: '4', name: 'Es Jeruk Peras', price: 4000, category: 'Minuman', icon: '🍊' },
+            { id: '5', name: 'Pentol Bakar Pedas', price: 5000, category: 'Cemilan', icon: '🍢' },
+            { id: '6', name: 'Crispy Snack Box', price: 7000, category: 'Cemilan', icon: '🍟' }
+        ];
+
+        let cart = [];
+        let orders = [];
+        let queueCounter = 1;
+        let selectedCategory = 'all';
+        let activeOrderForReceipt = null;
+
+        window.onload = function() {
+            renderBuyerMenu();
+            renderSellerMenu();
+            renderOrders();
+        };
+
+        // Realtime sync via Firestore
+        window.startRealtimeSync = function() {
+            if (!window.db) return;
+            const ordersRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
+            window.onSnapshot(ordersRef, (snapshot) => {
+                const fetchedOrders = [];
+                snapshot.forEach((docSnap) => {
+                    fetchedOrders.push({ firestoreId: docSnap.id, ...docSnap.data() });
+                });
+                // Urutkan berdasarkan waktu/antrean terbaru
+                fetchedOrders.sort((a, b) => b.createdAt - a.createdAt);
+                if (fetchedOrders.length > 0) {
+                    queueCounter = fetchedOrders.length + 1;
+                }
+                orders = fetchedOrders;
+                renderOrders();
+            }, (error) => {
+                console.log("Realtime sync error:", error);
+            });
+        };
+
+        function renderBuyerMenu() {
+            const listContainer = document.getElementById('buyerMenuList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const filtered = selectedCategory === 'all' 
+                ? menuItems 
+                : menuItems.filter(item => item.category === selectedCategory);
+
+            filtered.forEach(item => {
+                const cartItem = cart.find(c => c.id === item.id);
+                const qty = cartItem ? cartItem.qty : 0;
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition hover:shadow-md";
+                card.innerHTML = `
+                    <div>
+                        <div class="text-3xl mb-2 text-center py-2 bg-slate-50 rounded-xl">${item.icon}</div>
+                        <h4 class="font-bold text-slate-800 text-xs line-clamp-1">${item.name}</h4>
+                        <span class="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full inline-block my-1">${item.category}</span>
+                        <p class="font-extrabold text-brand-blue text-sm">Rp ${item.price.toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="mt-3">
+                        ${qty === 0 ? `
+                            <button onclick="addToCart('${item.id}')" class="w-full bg-brand-lightBlue text-brand-blue hover:bg-brand-blue hover:text-white py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Tambah
+                            </button>
+                        ` : `
+                            <div class="flex items-center justify-between bg-brand-blue text-white rounded-xl p-1">
+                                <button onclick="updateCartQty('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center text-xs font-bold">-</button>
+                                <span class="text-xs font-bold">${qty}</span>
+                                <button onclick="updateCartQty('${item.id}', 1)" class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center text-xs font-bold">+</button>
+                            </div>
+                        `}
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function addToCart(id) {
+            cart.push({ id, qty: 1 });
+            updateCartUI();
+            renderBuyerMenu();
+        }
+
+        function updateCartQty(id, delta) {
+            const index = cart.findIndex(c => c.id === id);
+            if (index !== -1) {
+                cart[index].qty += delta;
+                if (cart[index].qty <= 0) cart.splice(index, 1);
+            }
+            updateCartUI();
+            renderBuyerMenu();
+        }
+
+        function updateCartUI() {
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            let totalPrice = 0;
+            cart.forEach(c => {
+                const item = menuItems.find(m => m.id === c.id);
+                if (item) totalPrice += item.price * c.qty;
+            });
+
+            document.getElementById('cartCount').innerText = totalItems;
+            document.getElementById('cartTotal').innerText = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+
+            const cartBar = document.getElementById('floatingCart');
+            if (totalItems > 0 && currentRole === 'buyer') {
+                cartBar.classList.remove('translate-y-full');
+            } else {
+                cartBar.classList.add('translate-y-full');
+            }
+        }
+
+        function filterCategory(cat) {
+            selectedCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = "cat-btn active px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition bg-brand-blue text-white shadow-sm";
+                } else {
+                    btn.className = "cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition bg-slate-100 text-slate-600 hover:bg-slate-200";
+                }
+            });
+            renderBuyerMenu();
+        }
+
+        function toggleRoleModal() {
+            if (currentRole === 'buyer') {
+                if (isSellerAuthenticated) {
+                    switchToSellerView();
+                } else {
+                    document.getElementById('authModal').classList.remove('hidden');
+                }
+            } else {
+                switchToBuyerView();
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('sellerCodeInput').value = '';
+            document.getElementById('authError').classList.add('hidden');
+        }
+
+        function verifySellerCode(e) {
+            e.preventDefault();
+            const input = document.getElementById('sellerCodeInput').value.trim();
+            if (input.toUpperCase() === SECURITY_CODE) {
+                isSellerAuthenticated = true;
+                closeAuthModal();
+                switchToSellerView();
+            } else {
+                document.getElementById('authError').classList.remove('hidden');
+            }
+        }
+
+        function switchToSellerView() {
+            currentRole = 'seller';
+            document.getElementById('buyerSection').classList.add('hidden');
+            document.getElementById('sellerSection').classList.remove('hidden');
+            document.getElementById('roleSubtitle').innerText = 'Mode Penjual (Pengelola)';
+            document.getElementById('roleBtnText').innerText = 'Ke Pembeli';
+            switchSellerTab('orders');
+            renderOrders();
+            updateCartUI();
+        }
+
+        function switchToBuyerView() {
+            currentRole = 'buyer';
+            document.getElementById('sellerSection').classList.add('hidden');
+            document.getElementById('buyerSection').classList.remove('hidden');
+            document.getElementById('roleSubtitle').innerText = 'Mode Pembeli (Pemesanan)';
+            document.getElementById('roleBtnText').innerText = 'Ke Penjual';
+            updateCartUI();
+        }
+
+        function logoutSeller() {
+            isSellerAuthenticated = false;
+            switchToBuyerView();
+        }
+
+        function switchSellerTab(tab) {
+            document.getElementById('sellerScanTab').classList.add('hidden');
+            document.getElementById('sellerMenuTab').classList.add('hidden');
+            document.getElementById('sellerOrdersTab').classList.add('hidden');
+
+            document.getElementById('tabBtnScan').className = "flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400";
+            document.getElementById('tabBtnMenu').className = "flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400";
+            document.getElementById('tabBtnOrders').className = "flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400";
+
+            if (tab === 'scan') {
+                document.getElementById('sellerScanTab').classList.remove('hidden');
+                document.getElementById('tabBtnScan').className = "flex-1 py-2.5 text-xs font-bold border-b-2 border-brand-pink text-brand-pink";
+            } else if (tab === 'menu') {
+                document.getElementById('sellerMenuTab').classList.remove('hidden');
+                document.getElementById('tabBtnMenu').className = "flex-1 py-2.5 text-xs font-bold border-b-2 border-brand-blue text-brand-blue";
+            } else {
+                document.getElementById('sellerOrdersTab').classList.remove('hidden');
+                document.getElementById('tabBtnOrders').className = "flex-1 py-2.5 text-xs font-bold border-b-2 border-brand-pink text-brand-pink";
+            }
+        }
+
+        function startQrScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().catch(() => {});
+            }
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 200, height: 200 } },
+                (decodedText) => { processScannedCode(decodedText); },
+                (error) => {}
+            ).catch(err => alert("Kamera tidak dapat diakses. Gunakan input manual."));
+        }
+
+        function handleManualScan() {
+            const val = document.getElementById('manualScanInput').value.trim();
+            if (val) {
+                processScannedCode(val);
+                document.getElementById('manualScanInput').value = '';
+            }
+        }
+
+        async function processScannedCode(code) {
+            let target = code.trim();
+            try {
+                const parsed = JSON.parse(code);
+                if (parsed && parsed.queue) target = parsed.queue;
+            } catch(e) {}
+
+            const order = orders.find(o => o.queue.toUpperCase() === target.toUpperCase());
+            if (order) {
+                if (window.db && order.firestoreId) {
+                    try {
+                        const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', order.firestoreId);
+                        await window.updateDoc(docRef, { status: 'Selesai' });
+                    } catch(err) {
+                        console.log("Update error:", err);
+                    }
+                }
+                order.status = 'Selesai';
+                renderOrders();
+                showSuccessModal(order);
+            } else {
+                alert("❌ Kode QR / Antrean tidak ditemukan!");
+            }
+        }
+
+        function showSuccessModal(order) {
+            document.getElementById('scanModalQueue').innerText = order.queue;
+            document.getElementById('scanModalBuyer').innerText = order.buyer;
+            document.getElementById('scanModalTotal').innerText = `Rp ${order.total.toLocaleString('id-ID')}`;
+            document.getElementById('successScanModal').classList.remove('hidden');
+        }
+
+        function closeSuccessScanModal() {
+            document.getElementById('successScanModal').classList.add('hidden');
+        }
+
+        function handleSaveMenu(e) {
+            e.preventDefault();
+            const id = document.getElementById('menuId').value;
+            const name = document.getElementById('menuName').value.trim();
+            const price = parseInt(document.getElementById('menuPrice').value);
+            const category = document.getElementById('menuCategory').value;
+            const icon = document.getElementById('menuIcon').value.trim() || '🍱';
+
+            if (id) {
+                const index = menuItems.findIndex(m => m.id === id);
+                if (index !== -1) menuItems[index] = { id, name, price, category, icon };
+            } else {
+                menuItems.push({ id: Date.now().toString(), name, price, category, icon });
+            }
+            resetMenuForm();
+            renderSellerMenu();
+            renderBuyerMenu();
+        }
+
+        function editMenu(id) {
+            const item = menuItems.find(m => m.id === id);
+            if (item) {
+                document.getElementById('menuId').value = item.id;
+                document.getElementById('menuName').value = item.name;
+                document.getElementById('menuPrice').value = item.price;
+                document.getElementById('menuCategory').value = item.category;
+                document.getElementById('menuIcon').value = item.icon;
+            }
+        }
+
+        function deleteMenu(id) {
+            menuItems = menuItems.filter(m => m.id !== id);
+            renderSellerMenu();
+            renderBuyerMenu();
+        }
+
+        function resetMenuForm() {
+            document.getElementById('menuForm').reset();
+            document.getElementById('menuId').value = '';
+        }
+
+        function renderSellerMenu() {
+            const list = document.getElementById('sellerMenuList');
+            if (!list) return;
+            list.innerHTML = '';
+            menuItems.forEach(item => {
+                list.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">${item.icon}</span>
+                            <div>
+                                <h5 class="font-bold text-slate-800 text-xs">${item.name}</h5>
+                                <p class="text-[10px] text-slate-500">${item.category} • Rp ${item.price.toLocaleString('id-ID')}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <button onclick="editMenu('${item.id}')" class="p-2 text-slate-400 hover:text-brand-blue text-xs"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteMenu('${item.id}')" class="p-2 text-slate-400 hover:text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openCheckoutModal() {
+            if (cart.length === 0) return;
+            const container = document.getElementById('checkoutItems');
+            container.innerHTML = '';
+            let total = 0;
+            cart.forEach(c => {
+                const item = menuItems.find(m => m.id === c.id);
+                if (item) {
+                    const sub = item.price * c.qty;
+                    total += sub;
+                    container.innerHTML += `
+                        <div class="py-2 flex justify-between items-center text-xs">
+                            <div>
+                                <p class="font-semibold text-slate-800">${item.name}</p>
+                                <p class="text-[10px] text-slate-400">${c.qty}x @ Rp ${item.price.toLocaleString('id-ID')}</p>
+                            </div>
+                            <span class="font-bold text-slate-700">Rp ${sub.toLocaleString('id-ID')}</span>
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('checkoutTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        async function processOrder(e) {
+            e.preventDefault();
+            const name = document.getElementById('buyerName').value.trim();
+            let total = 0;
+            const orderDetail = cart.map(c => {
+                const item = menuItems.find(m => m.id === c.id);
+                total += item.price * c.qty;
+                return { name: item.name, qty: c.qty, price: item.price };
+            });
+
+            const queueNum = "#" + String(queueCounter).padStart(3, '0');
+
+            const newOrder = {
+                queue: queueNum,
+                buyer: name,
+                items: orderDetail,
+                total: total,
+                status: 'Menunggu Scan',
+                createdAt: Date.now()
+            };
+
+            if (window.db) {
+                try {
+                    const ordersRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
+                    await window.addDoc(ordersRef, newOrder);
+                } catch(err) {
+                    console.log("Add doc error:", err);
+                }
+            }
+
+            activeOrderForReceipt = newOrder;
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: JSON.stringify({ queue: queueNum }),
+                width: 140,
+                height: 140,
+                colorDark : "#4F46E5",
+                colorLight : "#ffffff"
+            });
+
+            document.getElementById('receiptQueue').innerText = queueNum;
+            document.getElementById('receiptName').innerText = name;
+
+            cart = [];
+            updateCartUI();
+            renderBuyerMenu();
+
+            closeCheckoutModal();
+            document.getElementById('receiptModal').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').classList.add('hidden');
+            document.getElementById('buyerName').value = '';
+        }
+
+        function simulasiScanSelf() {
+            if (activeOrderForReceipt) {
+                processScannedCode(activeOrderForReceipt.queue);
+                closeReceiptModal();
+            }
+        }
+
+        function renderOrders() {
+            const list = document.getElementById('sellerOrderList');
+            const badge = document.getElementById('orderCountBadge');
+            if (!list || !badge) return;
+            
+            list.innerHTML = '';
+            const pendingOrders = orders.filter(o => o.status === 'Menunggu Scan');
+            badge.innerText = pendingOrders.length;
+
+            if (orders.length === 0) {
+                list.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">Belum ada pesanan masuk.</div>`;
+                return;
+            }
+
+            orders.forEach(order => {
+                const isDone = order.status === 'Selesai';
+                let itemsHtml = order.items.map(i => `<li class="text-xs text-slate-600 flex justify-between"><span>${i.qty}x ${i.name}</span><span class="font-semibold">Rp ${(i.qty * i.price).toLocaleString('id-ID')}</span></li>`).join('');
+
+                list.innerHTML += `
+                    <div class="p-4 rounded-2xl border transition ${isDone ? 'bg-slate-50 border-slate-200 opacity-70' : 'bg-white border-brand-pink shadow-md'}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="font-black text-brand-blue text-base">${order.queue}</span>
+                                <h5 class="font-bold text-slate-800 text-xs">${order.buyer}</h5>
+                            </div>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                ${isDone ? 'PEMBELIAN SELESAI' : 'Menunggu Scan'}
+                            </span>
+                        </div>
+                        <ul class="space-y-1 mb-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100">${itemsHtml}</ul>
+                        <div class="flex justify-between items-center text-xs pt-1">
+                            <span class="font-extrabold text-brand-pink text-sm">Rp ${order.total.toLocaleString('id-ID')}</span>
+                            ${!isDone ? `
+                                <button onclick="processScannedCode('${order.queue}')" class="bg-brand-pink text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
+                                    Scan / Selesaikan
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
